@@ -1,0 +1,14 @@
+{
+  "name": "渡 — Central Pessoal",
+  "short_name": "Wataru",
+  "description": "Painel pessoal de rotina, hábitos, estudos para o MEXT, carreira e hobbies.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0c0b",
+  "theme_color": "#b3402c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

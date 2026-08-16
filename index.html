@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>渡 — Central Pessoal</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b3402c">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0c0b;
+    --bg-elevated:#151310;
+    --paper:#1c1915;
+    --paper-hi:#242019;
+    --ink:#ece6da;
+    --ink-dim:#a89c88;
+    --ink-faint:#6e6355;
+    --vermillion:#b3402c;
+    --vermillion-hi:#d1543d;
+    --gold:#b8964f;
+    --indigo:#4a6478;
+    --line:rgba(236,230,218,0.10);
+    --line-strong:rgba(236,230,218,0.18);
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 1200px 800px at 20% -10%, rgba(179,64,44,0.07), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 100% 10%, rgba(74,100,120,0.08), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-weight:400;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Zen Old Mincho', serif;}
+  ::selection{background:var(--vermillion);color:#fff;}
+  a{color:inherit;}
+
+  /* ---------- layout shell ---------- */
+  .shell{display:flex; min-height:100vh;}
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    width:236px; flex-shrink:0;
+    background:var(--bg-elevated);
+    border-right:1px solid var(--line);
+    display:flex; flex-direction:column;
+    padding:28px 0 20px;
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{display:flex; align-items:center; gap:12px; padding:0 22px 24px; border-bottom:1px solid var(--line); margin-bottom:18px;}
+  .torii{width:30px; height:26px; flex-shrink:0;}
+  .brand-text{line-height:1.15;}
+  .brand-text .jp{font-family:'Zen Old Mincho',serif; font-size:19px; color:var(--ink); display:block;}
+  .brand-text .sub{font-size:10px; letter-spacing:.14em; color:var(--ink-faint); text-transform:uppercase;}
+
+  .nav{display:flex; flex-direction:column; gap:2px; padding:0 12px; flex:1;}
+  .nav-item{
+    display:flex; align-items:center; gap:11px;
+    padding:10px 12px; border-radius:var(--radius);
+    font-size:13.5px; color:var(--ink-dim); cursor:pointer;
+    border-left:2px solid transparent;
+    transition:background .15s, color .15s, border-color .15s;
+    user-select:none;
+  }
+  .nav-item .num{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ink-faint); width:14px;}
+  .nav-item:hover{background:var(--paper); color:var(--ink);}
+  .nav-item.active{background:var(--paper-hi); color:var(--ink); border-left-color:var(--vermillion);}
+  .nav-item.active .num{color:var(--vermillion-hi);}
+
+  .sidebar-foot{padding:16px 22px 0; border-top:1px solid var(--line); margin-top:14px;}
+  .clock{font-family:'JetBrains Mono',monospace; font-size:20px; letter-spacing:.03em; color:var(--ink);}
+  .datestr{font-size:11px; color:var(--ink-faint); margin-top:2px; text-transform:capitalize;}
+  .countdown{margin-top:14px; padding-top:14px; border-top:1px solid var(--line);}
+  .countdown .cd-label{font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold);}
+  .countdown .cd-num{font-family:'JetBrains Mono',monospace; font-size:24px; color:var(--ink); margin-top:2px;}
+  .countdown .cd-sub{font-size:10.5px; color:var(--ink-faint);}
+
+  /* ---------- main ---------- */
+  main{flex:1; min-width:0; padding:40px 52px 90px; max-width:980px;}
+  .section{display:none;}
+  .section.active{display:block; animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--vermillion-hi); margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .eyebrow::before{content:''; width:16px; height:1px; background:var(--vermillion-hi);}
+  .page-title{font-size:32px; font-weight:600; margin:0 0 6px;}
+  .page-sub{color:var(--ink-dim); font-size:14px; max-width:560px; line-height:1.6; margin-bottom:32px;}
+
+  /* hero (inicio only) */
+  .hero{
+    position:relative; border:1px solid var(--line-strong); border-radius:var(--radius);
+    padding:30px 34px; margin-bottom:30px; overflow:hidden;
+    background:linear-gradient(180deg, rgba(179,64,44,0.08), rgba(20,18,16,0.4));
+  }
+  .hero-scene{position:absolute; inset:0; opacity:.5; pointer-events:none;}
+  .hero-inner{position:relative; z-index:1;}
+  .hero blockquote{
+    font-family:'Zen Old Mincho',serif; font-size:19px; line-height:1.55; font-style:italic;
+    margin:0 0 14px; color:var(--ink); border-left:2px solid var(--vermillion); padding-left:16px;
+  }
+  .hero .attrib{font-size:11px; color:var(--ink-faint); letter-spacing:.05em;}
+
+  /* cards */
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; margin-bottom:20px;}
+  .card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .card-title{font-family:'Zen Old Mincho',serif; font-size:16px; font-weight:600; display:flex; align-items:center; gap:9px;}
+  .card-title .dot{width:6px; height:6px; background:var(--vermillion); border-radius:50%; display:inline-block;}
+  .card-meta{font-size:11px; color:var(--ink-faint); font-family:'JetBrains Mono',monospace;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  @media(max-width:880px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+  /* checklist / hanko checkbox — signature element */
+  .list{display:flex; flex-direction:column; gap:2px;}
+  .list-item{display:flex; align-items:center; gap:12px; padding:8px 4px; border-bottom:1px solid var(--line); font-size:14px;}
+  .list-item:last-child{border-bottom:none;}
+  .hanko{
+    width:19px; height:19px; flex-shrink:0; border:1.5px solid var(--ink-faint); border-radius:3px;
+    cursor:pointer; position:relative; transition:border-color .15s;
+  }
+  .hanko:hover{border-color:var(--vermillion-hi);}
+  .hanko.checked{border-color:var(--vermillion); background:var(--vermillion);}
+  .hanko.checked::after{
+    content:'印'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Zen Old Mincho',serif; font-size:12px; color:#f2e9df; line-height:1;
+  }
+  .list-item .txt{flex:1; transition:color .15s, opacity .15s;}
+  .list-item.done .txt{color:var(--ink-faint); text-decoration:line-through; opacity:.75;}
+  .list-item .del{opacity:0; cursor:pointer; color:var(--ink-faint); font-size:15px; padding:0 4px; transition:opacity .15s;}
+  .list-item:hover .del{opacity:1;}
+  .list-item .del:hover{color:var(--vermillion-hi);}
+
+  .add-row{display:flex; gap:8px; margin-top:12px;}
+  .add-row input{
+    flex:1; background:var(--bg-elevated); border:1px solid var(--line-strong); color:var(--ink);
+    padding:9px 12px; border-radius:var(--radius); font-family:inherit; font-size:13px; outline:none;
+  }
+  .add-row input:focus{border-color:var(--vermillion);}
+  .add-row button{
+    background:var(--vermillion); color:#fff; border:none; padding:0 16px; border-radius:var(--radius);
+    cursor:pointer; font-family:inherit; font-size:13px; font-weight:500; transition:background .15s;
+  }
+  .add-row button:hover{background:var(--vermillion-hi);}
+
+  /* habit tracker grid */
+  .habit-row{display:grid; grid-template-columns:1fr repeat(7,26px) 40px; align-items:center; gap:6px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .habit-row:last-child{border-bottom:none;}
+  .habit-head{display:grid; grid-template-columns:1fr repeat(7,26px) 40px; gap:6px; font-size:10px; color:var(--ink-faint); letter-spacing:.08em; text-transform:uppercase; padding-bottom:8px; border-bottom:1px solid var(--line-strong); margin-bottom:2px;}
+  .habit-head span{text-align:center;}
+  .habit-day{width:20px; height:20px; border:1.5px solid var(--ink-faint); border-radius:3px; cursor:pointer; margin:0 auto;}
+  .habit-day.checked{background:var(--vermillion); border-color:var(--vermillion);}
+  .streak{font-family:'JetBrains Mono',monospace; color:var(--gold); text-align:right; font-size:12px;}
+  .habit-name{display:flex; align-items:center; gap:8px;}
+  .habit-name .del{opacity:0; cursor:pointer; color:var(--ink-faint); font-size:13px;}
+  .habit-row:hover .del{opacity:1;}
+
+  /* week planner */
+  .week-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:10px;}
+  @media(max-width:880px){.week-grid{grid-template-columns:repeat(2,1fr);}}
+  .day-card{background:var(--bg-elevated); border:1px solid var(--line); border-radius:var(--radius); padding:12px;}
+  .day-card .dname{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; display:block;}
+  .day-card textarea{
+    width:100%; min-height:90px; background:transparent; border:none; color:var(--ink); font-family:inherit;
+    font-size:12.5px; resize:vertical; outline:none; line-height:1.5;
+  }
+
+  /* journal */
+  .journal-input textarea{
+    width:100%; min-height:90px; background:var(--bg-elevated); border:1px solid var(--line-strong); color:var(--ink);
+    font-family:inherit; font-size:13.5px; padding:12px 14px; border-radius:var(--radius); resize:vertical; outline:none; line-height:1.6;
+  }
+  .journal-input textarea:focus{border-color:var(--vermillion);}
+  .entry{border-left:2px solid var(--line-strong); padding:4px 0 4px 16px; margin-bottom:16px;}
+  .entry .edate{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold); margin-bottom:4px;}
+  .entry .etxt{font-size:13.5px; line-height:1.6; color:var(--ink-dim); white-space:pre-wrap;}
+  .entry .edel{font-size:11px; color:var(--ink-faint); cursor:pointer; margin-top:4px; display:inline-block;}
+  .entry .edel:hover{color:var(--vermillion-hi);}
+
+  /* hobby cards */
+  .hobby-card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; cursor:pointer;}
+  .hobby-top{padding:20px 20px 16px; display:flex; align-items:center; justify-content:between; gap:10px;}
+  .hobby-icon{font-size:20px;}
+  .hobby-name{font-family:'Zen Old Mincho',serif; font-size:16px; margin-top:8px;}
+  .hobby-body{max-height:0; overflow:hidden; transition:max-height .3s ease; border-top:1px solid transparent;}
+  .hobby-card.open .hobby-body{max-height:520px; border-top:1px solid var(--line);}
+  .hobby-body-inner{padding:16px 20px 20px;}
+  .hobby-note{width:100%; background:var(--bg-elevated); border:1px solid var(--line-strong); color:var(--ink); font-family:inherit; font-size:12.5px; padding:10px 12px; border-radius:var(--radius); min-height:56px; resize:vertical; outline:none; margin-top:12px;}
+
+  /* progress bar */
+  .progress-wrap{margin-bottom:10px;}
+  .progress-labels{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-faint); margin-bottom:5px;}
+  .progress-bar{height:5px; background:var(--bg-elevated); border-radius:3px; overflow:hidden; border:1px solid var(--line);}
+  .progress-fill{height:100%; background:linear-gradient(90deg,var(--vermillion),var(--gold)); transition:width .4s ease;}
+
+  /* character progression */
+  .char-card{
+    background:linear-gradient(135deg, rgba(179,64,44,0.10), rgba(184,150,79,0.05)), var(--paper);
+    border:1px solid var(--line-strong); border-radius:var(--radius); padding:24px 26px; margin-bottom:20px;
+    display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start;
+  }
+  .char-id{min-width:190px;}
+  .char-lv{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:.1em; text-transform:uppercase;}
+  .char-title{font-family:'Zen Old Mincho',serif; font-size:24px; margin:2px 0 12px;}
+  .xp-bar{height:6px; background:var(--bg-elevated); border:1px solid var(--line); border-radius:3px; overflow:hidden; width:190px;}
+  .xp-fill{height:100%; background:linear-gradient(90deg,var(--vermillion),var(--gold));}
+  .xp-text{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-faint); margin-top:5px;}
+  .stat-grid{flex:1; min-width:280px; display:grid; grid-template-columns:1fr 1fr; gap:10px 22px;}
+  .stat-row{}
+  .stat-label{display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-dim); margin-bottom:4px;}
+  .stat-label .sn{display:flex; align-items:center; gap:6px;}
+  .stat-label .sv{font-family:'JetBrains Mono',monospace; color:var(--ink-faint);}
+  .stat-bar{height:5px; background:var(--bg-elevated); border:1px solid var(--line); border-radius:3px; overflow:hidden;}
+  .stat-fill{height:100%; background:var(--indigo);}
+
+  /* hobby consistency */
+  .hobby-consist{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+  .spark{width:110px; height:32px; display:block;}
+  .consist-num{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold); text-align:right;}
+  .consist-num .lbl{display:block; font-size:9.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-family:'Zen Kaku Gothic New',sans-serif;}
+  .checkin-btn{
+    width:100%; margin-top:12px; padding:10px; border-radius:var(--radius); border:1.5px dashed var(--line-strong);
+    background:transparent; color:var(--ink-dim); font-family:inherit; font-size:12.5px; cursor:pointer; text-align:center;
+    transition:all .15s;
+  }
+  .checkin-btn:hover{border-color:var(--vermillion-hi); color:var(--ink);}
+  .checkin-btn.done{background:var(--vermillion); border-style:solid; border-color:var(--vermillion); color:#fff;}
+
+  /* settings / notifications */
+  .field-label{font-size:11px; color:var(--ink-faint); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px; display:block;}
+  .field{margin-bottom:16px;}
+  .field input[type=text], .field input[type=password]{
+    width:100%; background:var(--bg-elevated); border:1px solid var(--line-strong); color:var(--ink);
+    padding:10px 12px; border-radius:var(--radius); font-family:'JetBrains Mono',monospace; font-size:12.5px; outline:none;
+  }
+  .field input:focus{border-color:var(--vermillion);}
+  .btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+  .btn-ghost{background:transparent; border:1px solid var(--line-strong); color:var(--ink-dim); padding:9px 16px; border-radius:var(--radius); font-family:inherit; font-size:12.5px; cursor:pointer;}
+  .btn-ghost:hover{border-color:var(--vermillion-hi); color:var(--ink);}
+  .btn-solid{background:var(--vermillion); border:none; color:#fff; padding:9px 16px; border-radius:var(--radius); font-family:inherit; font-size:12.5px; cursor:pointer;}
+  .btn-solid:hover{background:var(--vermillion-hi);}
+  .status-msg{font-size:11.5px; color:var(--gold); margin-top:10px; min-height:14px;}
+  .steps-list{padding-left:18px; font-size:13px; color:var(--ink-dim); line-height:1.9;}
+  .steps-list code{background:var(--bg-elevated); padding:1px 6px; border-radius:3px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--gold);}
+
+  .footer-note{margin-top:40px; text-align:center; font-size:11px; color:var(--ink-faint); letter-spacing:.05em;}
+
+  /* mobile */
+  .mobile-topbar{display:none;}
+  @media(max-width:760px){
+    .shell{flex-direction:column;}
+    .sidebar{position:relative; width:100%; height:auto; flex-direction:row; align-items:center; padding:14px 16px; overflow-x:auto;}
+    .brand{border:none; padding:0 14px 0 0; margin:0;}
+    .sidebar-foot{display:none;}
+    .nav{flex-direction:row; padding:0;}
+    .nav-item{border-left:none; border-bottom:2px solid transparent; white-space:nowrap;}
+    .nav-item.active{border-left:none; border-bottom-color:var(--vermillion);}
+    main{padding:26px 18px 70px;}
+    .grid-2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="torii" viewBox="0 0 40 34" fill="none">
+        <rect x="2" y="6" width="36" height="4" rx="1" fill="#b3402c"/>
+        <rect x="0" y="0" width="40" height="3" rx="1" fill="#b3402c"/>
+        <rect x="6" y="6" width="4" height="27" fill="#b3402c"/>
+        <rect x="30" y="6" width="4" height="27" fill="#b3402c"/>
+        <rect x="16" y="12" width="8" height="3" fill="#b8964f"/>
+      </svg>
+      <div class="brand-text">
+        <span class="jp">渡 — Wataru</span>
+        <span class="sub">Central pessoal</span>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <div class="nav-item active" data-target="inicio"><span class="num">01</span>Início</div>
+      <div class="nav-item" data-target="diaadia"><span class="num">02</span>Dia a dia</div>
+      <div class="nav-item" data-target="mext"><span class="num">03</span>Rumo ao MEXT</div>
+      <div class="nav-item" data-target="carreira"><span class="num">04</span>Carreira</div>
+      <div class="nav-item" data-target="hobbies"><span class="num">05</span>Hobbies</div>
+      <div class="nav-item" data-target="vida"><span class="num">06</span>Vida</div>
+      <div class="nav-item" data-target="notificacoes"><span class="num">07</span>Notificações</div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="datestr" id="datestr">—</div>
+      <div class="countdown">
+        <div class="cd-label">Exame MEXT</div>
+        <div class="cd-num" id="cdnum">—</div>
+        <div class="cd-sub">dias restantes · ajuste a data em Rumo ao MEXT</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- 01 INÍCIO -->
+    <section class="section active" id="inicio">
+      <div class="eyebrow">01 · Início</div>
+      <h1 class="page-title">Se você não gosta do seu destino, mude-o.</h1>
+      <p class="page-sub">A dor de mudar é menor que a dor do arrependimento. Este é o painel — um lugar só seu para acompanhar o caminho até o Japão, a carreira em engenharia de software, e tudo o mais entre os dois.</p>
+
+      <div class="hero">
+        <svg class="hero-scene" viewBox="0 0 900 160" preserveAspectRatio="none">
+          <path d="M0,140 L900,140" stroke="#b8964f" stroke-width="1" opacity="0.3"/>
+          <path d="M0,120 Q225,60 450,90 T900,70" stroke="#b3402c" stroke-width="1.2" fill="none" opacity="0.5"/>
+          <circle cx="800" cy="35" r="22" fill="#b3402c" opacity="0.35"/>
+        </svg>
+        <div class="hero-inner">
+          <blockquote>“Because they called me a loser, I'll prove to them they are wrong.”</blockquote>
+          <div class="attrib">— you know who</div>
+        </div>
+      </div>
+
+      <div class="char-card">
+        <div class="char-id">
+          <div class="char-lv" id="char-lv">Nv. 1</div>
+          <div class="char-title" id="char-title">Aspirante</div>
+          <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+          <div class="xp-text" id="xp-text">0 / 150 XP</div>
+        </div>
+        <div class="stat-grid" id="stat-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>Foco de hoje</div>
+          <div class="card-meta" id="inicio-count">0/0</div>
+        </div>
+        <div class="list" id="inicio-list"></div>
+        <div class="add-row">
+          <input id="inicio-input" placeholder="Adicionar tarefa de foco…" />
+          <button onclick="addItem('inicio')">Add</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="dot"></span>Atalhos</div>
+          <div class="list" style="margin-top:12px;">
+            <div class="list-item"><div class="hanko" style="visibility:hidden"></div><div class="txt" style="cursor:pointer" onclick="goTo('diaadia')">→ Hábitos e planejamento semanal</div></div>
+            <div class="list-item"><div class="hanko" style="visibility:hidden"></div><div class="txt" style="cursor:pointer" onclick="goTo('mext')">→ Roteiro de estudos MEXT</div></div>
+            <div class="list-item"><div class="hanko" style="visibility:hidden"></div><div class="txt" style="cursor:pointer" onclick="goTo('carreira')">→ Roadmap de carreira</div></div>
+            <div class="list-item"><div class="hanko" style="visibility:hidden"></div><div class="txt" style="cursor:pointer" onclick="goTo('hobbies')">→ Hobbies</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot"></span>Panorama</div>
+          <div class="progress-wrap" style="margin-top:14px;">
+            <div class="progress-labels"><span>Roteiro MEXT</span><span id="p-mext">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="pf-mext" style="width:0%"></div></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-labels"><span>Carreira</span><span id="p-carreira">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="pf-carreira" style="width:0%"></div></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-labels"><span>Objetivos 2026</span><span id="p-vida">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="pf-vida" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 DIA A DIA -->
+    <section class="section" id="diaadia">
+      <div class="eyebrow">02 · Dia a dia</div>
+      <h1 class="page-title">Hábitos + planejamento</h1>
+      <p class="page-sub">O que se repete todo dia é o que decide o destino. Marque os selos conforme cumprir cada hábito.</p>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span class="dot"></span>Hábitos da semana</div></div>
+        <div class="habit-head"><span style="text-align:left;">Hábito</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span><span>D</span><span></span></div>
+        <div id="habit-list"></div>
+        <div class="add-row">
+          <input id="habit-input" placeholder="Novo hábito…" />
+          <button onclick="addHabit()">Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Planejamento semanal</div>
+        <div class="week-grid" id="week-grid" style="margin-top:14px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Diário</div>
+        <div class="journal-input" style="margin-top:12px;">
+          <textarea id="journal-text" placeholder="Como foi o dia hoje…"></textarea>
+          <div class="add-row"><span></span><button onclick="addJournal()">Salvar entrada</button></div>
+        </div>
+        <div id="journal-list" style="margin-top:18px;"></div>
+      </div>
+    </section>
+
+    <!-- 03 MEXT -->
+    <section class="section" id="mext">
+      <div class="eyebrow">03 · Rumo ao Japão</div>
+      <h1 class="page-title">Exame MEXT</h1>
+      <p class="page-sub">O roteiro de preparação para o exame do Ministério da Educação do Japão (MEXT) — a via para estudar no Japão.</p>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>Data do exame</div>
+        </div>
+        <div class="add-row">
+          <input type="date" id="mext-date" style="max-width:220px;" />
+          <button onclick="saveExamDate()">Salvar data</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>Roteiro de estudos</div>
+          <div class="card-meta" id="mext-count">0/0</div>
+        </div>
+        <div class="list" id="mext-list"></div>
+        <div class="add-row">
+          <input id="mext-input" placeholder="Adicionar item ao roteiro…" />
+          <button onclick="addItem('mext')">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 CARREIRA -->
+    <section class="section" id="carreira">
+      <div class="eyebrow">04 · Carreira</div>
+      <h1 class="page-title">Engenharia de software</h1>
+      <p class="page-sub">O roadmap técnico e profissional — o que estudar, construir e conquistar.</p>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>Roadmap</div>
+          <div class="card-meta" id="carreira-count">0/0</div>
+        </div>
+        <div class="list" id="carreira-list"></div>
+        <div class="add-row">
+          <input id="carreira-input" placeholder="Adicionar meta de carreira…" />
+          <button onclick="addItem('carreira')">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 HOBBIES -->
+    <section class="section" id="hobbies">
+      <div class="eyebrow">05 · Hobbies</div>
+      <h1 class="page-title">Entre uma coisa e outra</h1>
+      <p class="page-sub">Clique em um card para abrir anotações e uma lista rápida.</p>
+      <div class="grid-3" id="hobby-grid"></div>
+    </section>
+
+    <!-- 06 VIDA -->
+    <section class="section" id="vida">
+      <div class="eyebrow">06 · Vida</div>
+      <h1 class="page-title">Panorama geral</h1>
+      <p class="page-sub">Objetivos de 2026, reflexões mensais e o que não pode ficar para depois.</p>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>Objetivos 2026</div>
+          <div class="card-meta" id="vida-count">0/0</div>
+        </div>
+        <div class="list" id="vida-list"></div>
+        <div class="add-row">
+          <input id="vida-input" placeholder="Adicionar objetivo de 2026…" />
+          <button onclick="addItem('vida')">Add</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="dot"></span>Reflexão mensal</div>
+          <div class="journal-input" style="margin-top:12px;">
+            <textarea id="reflexao-text" placeholder="O que aprendi este mês…"></textarea>
+            <div class="add-row"><span></span><button onclick="addReflexao()">Salvar reflexão</button></div>
+          </div>
+          <div id="reflexao-list" style="margin-top:14px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title"><span class="dot"></span>Antes de morrer…</div><div class="card-meta" id="bucket-count">0/0</div></div>
+          <div class="list" id="bucket-list"></div>
+          <div class="add-row">
+            <input id="bucket-input" placeholder="Adicionar…" />
+            <button onclick="addItem('bucket')">Add</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 NOTIFICAÇÕES -->
+    <section class="section" id="notificacoes">
+      <div class="eyebrow">07 · Notificações</div>
+      <h1 class="page-title">Mensagens para o seu celular</h1>
+      <p class="page-sub">Um site sozinho não consegue empurrar notificação pro seu celular sem um servidor por trás. O caminho mais simples sem precisar montar backend: conectar este painel a um bot do Telegram seu — daí qualquer botão daqui pode te mandar mensagem direto no chat.</p>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Conectar bot do Telegram</div>
+        <ol class="steps-list" style="margin-top:12px;">
+          <li>No Telegram, fale com <code>@BotFather</code> → <code>/newbot</code> → copie o <b>token</b> gerado.</li>
+          <li>Fale qualquer coisa com o seu bot novo, depois acesse <code>api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> no navegador para achar seu <b>chat id</b>.</li>
+          <li>Cole os dois campos abaixo. Ficam salvos só neste painel.</li>
+        </ol>
+        <div class="field">
+          <span class="field-label">Bot token</span>
+          <input type="password" id="tg-token" placeholder="123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+        </div>
+        <div class="field">
+          <span class="field-label">Chat ID</span>
+          <input type="text" id="tg-chatid" placeholder="123456789" />
+        </div>
+        <div class="btn-row">
+          <button class="btn-solid" onclick="saveTelegram()">Salvar</button>
+          <button class="btn-ghost" onclick="testTelegram()">Enviar teste</button>
+          <button class="btn-ghost" onclick="sendPendencias()">Enviar pendências de hoje</button>
+        </div>
+        <div class="status-msg" id="tg-status"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Instalar como app no celular</div>
+        <p class="page-sub" style="margin-bottom:12px;">Para ganhar ícone na tela e abrir sem barra de navegador, hospede os 4 arquivos (<code>index.html</code>, <code>manifest.json</code>, <code>sw.js</code>, <code>icon.svg</code>) juntos — por exemplo GitHub Pages, Netlify ou Vercel, todos gratuitos. Depois:</p>
+        <ol class="steps-list">
+          <li>Abra o link no navegador do celular (Chrome no Android, Safari no iPhone).</li>
+          <li>Toque em <code>Adicionar à tela de início</code>.</li>
+          <li>O painel abre como app, com ícone próprio e funcionando offline.</li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="footer-note">protótipo pessoal · dados salvos apenas para você</div>
+  </main>
+</div>
+
+<script>
+/* ---------------- storage helpers ---------------- */
+async function getData(key, fallback){
+  try{
+    const r = await window.storage.get(key, false);
+    return r ? JSON.parse(r.value) : fallback;
+  }catch(e){ return fallback; }
+}
+async function setData(key, value){
+  try{ await window.storage.set(key, JSON.stringify(value), false); }catch(e){ console.error('storage error', e); }
+}
+function uid(){ return Math.random().toString(36).slice(2,9); }
+
+/* ---------------- nav ---------------- */
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click', ()=>goTo(el.dataset.target));
+});
+function goTo(id){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.target===id));
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active', s.id===id));
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+/* ---------------- clock ---------------- */
+function tick(){
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('pt-BR', {hour12:false});
+  document.getElementById('datestr').textContent = now.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long'});
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------------- character progression ---------------- */
+const ATTRS = [
+  {key:'estoicismo', icon:'🏛', name:'Estoicismo'},
+  {key:'forca', icon:'💪', name:'Força'},
+  {key:'disciplina', icon:'🌲', name:'Disciplina'},
+  {key:'positividade', icon:'☀️', name:'Positividade'},
+  {key:'paz', icon:'🌿', name:'Paz'},
+  {key:'sabedoria', icon:'🧠', name:'Sabedoria'}
+];
+const ATTR_MAP = { inicio:'disciplina', mext:'sabedoria', carreira:'sabedoria', vida:'estoicismo', bucket:'positividade' };
+const HOBBY_ATTR = { leitura:'sabedoria', jogos:'paz', gastronomia:'positividade', idiomas:'sabedoria', desenho:'positividade', karate:'forca', violao:'paz' };
+const TITLES = [[0,'Aspirante'],[3,'Ronin'],[6,'Samurai'],[9,'Mestre'],[13,'Lenda']];
+
+let character = {xp:0, stats:{estoicismo:0,forca:0,disciplina:0,positividade:0,paz:0,sabedoria:0}};
+async function loadCharacter(){
+  character = await getData('character:state', character);
+  renderCharacter();
+}
+function levelFromXp(xp){ return 1 + Math.floor(xp/150); }
+function titleFromLevel(lv){
+  let t = TITLES[0][1];
+  for(const [minLv, name] of TITLES){ if(lv >= minLv+1) t = name; }
+  return t;
+}
+function renderCharacter(){
+  const lv = levelFromXp(character.xp);
+  document.getElementById('char-lv').textContent = 'Nv. ' + lv;
+  document.getElementById('char-title').textContent = titleFromLevel(lv);
+  const inLevel = character.xp % 150;
+  document.getElementById('xp-fill').style.width = (inLevel/150*100) + '%';
+  document.getElementById('xp-text').textContent = inLevel + ' / 150 XP';
+  const grid = document.getElementById('stat-grid');
+  grid.innerHTML = '';
+  ATTRS.forEach(a=>{
+    const val = character.stats[a.key] || 0;
+    const statLv = Math.floor(val/100) + 1;
+    const fill = val % 100;
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+    row.innerHTML = `<div class="stat-label"><span class="sn">${a.icon} ${a.name}</span><span class="sv">nv ${statLv}</span></div><div class="stat-bar"><div class="stat-fill" style="width:${fill}%"></div></div>`;
+    grid.appendChild(row);
+  });
+}
+function awardXP(attrKey, amount){
+  if(!attrKey) return;
+  character.xp = Math.max(0, character.xp + amount);
+  character.stats[attrKey] = Math.max(0, (character.stats[attrKey]||0) + amount);
+  renderCharacter();
+  setData('character:state', character);
+}
+loadCharacter();
+
+/* ---------------- generic checklist module ---------------- */
+const LIST_CONFIG = {
+  inicio:   {key:'inicio:goals', listEl:'inicio-list', countEl:'inicio-count', progFillEl:null, progLabelEl:null,
+             defaults:[{id:uid(),text:'Estudar lógica de programação',done:false},{id:uid(),text:'Ler o livro Kokoro',done:true},{id:uid(),text:'Fazer 3 exercícios do MEXT (Química, Física, Matemática)',done:false}]},
+  mext:     {key:'mext:items', listEl:'mext-list', countEl:'mext-count', progFillEl:'pf-mext', progLabelEl:'p-mext',
+             defaults:[{id:uid(),text:'Estudar lógica de programação',done:false},{id:uid(),text:'Ler o livro Kokoro',done:true},{id:uid(),text:'Exercícios de Química (MEXT)',done:false},{id:uid(),text:'Exercícios de Física (MEXT)',done:false},{id:uid(),text:'Exercícios de Matemática (MEXT)',done:false},{id:uid(),text:'Revisar gramática de japonês N4',done:false}]},
+  carreira: {key:'carreira:items', listEl:'carreira-list', countEl:'carreira-count', progFillEl:'pf-carreira', progLabelEl:'p-carreira',
+             defaults:[{id:uid(),text:'Fortalecer fundamentos: estrutura de dados e algoritmos',done:false},{id:uid(),text:'Construir 1 projeto completo (backend + frontend)',done:false},{id:uid(),text:'Contribuir para um projeto open source',done:false},{id:uid(),text:'Estudar inglês técnico e japonês técnico',done:false},{id:uid(),text:'Montar portfólio / GitHub organizado',done:false}]},
+  vida:     {key:'vida:objetivos2026', listEl:'vida-list', countEl:'vida-count', progFillEl:'pf-vida', progLabelEl:'p-vida',
+             defaults:[{id:uid(),text:'Passar no exame MEXT',done:false},{id:uid(),text:'Manter rotina de estudos consistente',done:false},{id:uid(),text:'Cuidar da saúde física e mental',done:false}]},
+  bucket:   {key:'vida:bucket', listEl:'bucket-list', countEl:'bucket-count', progFillEl:null, progLabelEl:null,
+             defaults:[{id:uid(),text:'Morar no Japão',done:false},{id:uid(),text:'Publicar um projeto próprio',done:false}]}
+};
+const state = {};
+
+async function loadList(name){
+  const cfg = LIST_CONFIG[name];
+  state[name] = await getData(cfg.key, cfg.defaults);
+  renderList(name);
+}
+function renderList(name){
+  const cfg = LIST_CONFIG[name];
+  const items = state[name];
+  const el = document.getElementById(cfg.listEl);
+  el.innerHTML = '';
+  items.forEach(item=>{
+    const row = document.createElement('div');
+    row.className = 'list-item' + (item.done ? ' done' : '');
+    row.innerHTML = `<div class="hanko ${item.done?'checked':''}"></div><div class="txt">${escapeHtml(item.text)}</div><div class="del">✕</div>`;
+    row.querySelector('.hanko').addEventListener('click', ()=>toggleItem(name, item.id));
+    row.querySelector('.del').addEventListener('click', ()=>deleteItem(name, item.id));
+    el.appendChild(row);
+  });
+  const done = items.filter(i=>i.done).length;
+  const countEl = document.getElementById(cfg.countEl);
+  if(countEl) countEl.textContent = `${done}/${items.length}`;
+  if(cfg.progFillEl){
+    const pct = items.length ? Math.round(done/items.length*100) : 0;
+    document.getElementById(cfg.progFillEl).style.width = pct+'%';
+    document.getElementById(cfg.progLabelEl).textContent = pct+'%';
+  }
+}
+function toggleItem(name, id){
+  const item = state[name].find(i=>i.id===id);
+  item.done = !item.done;
+  renderList(name);
+  setData(LIST_CONFIG[name].key, state[name]);
+  awardXP(ATTR_MAP[name], item.done ? 8 : -8);
+}
+function deleteItem(name, id){
+  state[name] = state[name].filter(i=>i.id!==id);
+  renderList(name);
+  setData(LIST_CONFIG[name].key, state[name]);
+}
+function addItem(name){
+  const inputId = name+'-input';
+  const input = document.getElementById(inputId);
+  const text = input.value.trim();
+  if(!text) return;
+  state[name].push({id:uid(), text, done:false});
+  input.value='';
+  renderList(name);
+  setData(LIST_CONFIG[name].key, state[name]);
+}
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+Object.keys(LIST_CONFIG).forEach(loadList);
+
+/* ---------------- habits ---------------- */
+const DAY_LABELS = ['S','T','Q','Q','S','S','D'];
+let habits = [];
+async function loadHabits(){
+  habits = await getData('habitos:list', [
+    {id:uid(), text:'Estudar japonês', days:[false,false,false,false,false,false,false]},
+    {id:uid(), text:'Exercício físico', days:[false,false,false,false,false,false,false]},
+    {id:uid(), text:'Ler 20 min', days:[false,false,false,false,false,false,false]}
+  ]);
+  renderHabits();
+}
+function renderHabits(){
+  const el = document.getElementById('habit-list');
+  el.innerHTML = '';
+  habits.forEach(h=>{
+    const row = document.createElement('div');
+    row.className = 'habit-row';
+    const streak = h.days.filter(Boolean).length;
+    row.innerHTML = `<div class="habit-name">${escapeHtml(h.text)}<span class="del">✕</span></div>` +
+      h.days.map((d,i)=>`<div class="habit-day ${d?'checked':''}" data-i="${i}"></div>`).join('') +
+      `<div class="streak">${streak}/7</div>`;
+    row.querySelectorAll('.habit-day').forEach(dayEl=>{
+      dayEl.addEventListener('click', ()=>{
+        const i = +dayEl.dataset.i;
+        h.days[i] = !h.days[i];
+        renderHabits();
+        setData('habitos:list', habits);
+        awardXP('disciplina', h.days[i] ? 5 : -5);
+      });
+    });
+    row.querySelector('.del').addEventListener('click', ()=>{
+      habits = habits.filter(x=>x.id!==h.id);
+      renderHabits();
+      setData('habitos:list', habits);
+    });
+    el.appendChild(row);
+  });
+}
+function addHabit(){
+  const input = document.getElementById('habit-input');
+  const text = input.value.trim();
+  if(!text) return;
+  habits.push({id:uid(), text, days:[false,false,false,false,false,false,false]});
+  input.value='';
+  renderHabits();
+  setData('habitos:list', habits);
+}
+loadHabits();
+
+/* ---------------- week planner ---------------- */
+const WEEKDAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+let weekData = {};
+async function loadWeek(){
+  weekData = await getData('planejamento:week', {});
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+  WEEKDAYS.forEach(day=>{
+    const card = document.createElement('div');
+    card.className = 'day-card';
+    card.innerHTML = `<span class="dname">${day}</span><textarea placeholder="tarefas…">${escapeHtml(weekData[day]||'')}</textarea>`;
+    const ta = card.querySelector('textarea');
+    let timer;
+    ta.addEventListener('input', ()=>{
+      clearTimeout(timer);
+      timer = setTimeout(()=>{ weekData[day]=ta.value; setData('planejamento:week', weekData); }, 500);
+    });
+    grid.appendChild(card);
+  });
+}
+loadWeek();
+
+/* ---------------- journal ---------------- */
+let journal = [];
+async function loadJournal(){
+  journal = await getData('diario:entries', []);
+  renderJournal();
+}
+function renderJournal(){
+  const el = document.getElementById('journal-list');
+  el.innerHTML = '';
+  journal.slice().reverse().forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'entry';
+    div.innerHTML = `<div class="edate">${e.date}</div><div class="etxt">${escapeHtml(e.text)}</div><div class="edel">remover</div>`;
+    div.querySelector('.edel').addEventListener('click', ()=>{
+      journal = journal.filter(x=>x.id!==e.id);
+      renderJournal();
+      setData('diario:entries', journal);
+    });
+    el.appendChild(div);
+  });
+}
+function addJournal(){
+  const ta = document.getElementById('journal-text');
+  const text = ta.value.trim();
+  if(!text) return;
+  journal.push({id:uid(), date:new Date().toLocaleDateString('pt-BR'), text});
+  ta.value='';
+  renderJournal();
+  setData('diario:entries', journal);
+}
+loadJournal();
+
+/* ---------------- reflexao mensal ---------------- */
+let reflexoes = [];
+async function loadReflexao(){
+  reflexoes = await getData('vida:reflexao', []);
+  renderReflexao();
+}
+function renderReflexao(){
+  const el = document.getElementById('reflexao-list');
+  el.innerHTML = '';
+  reflexoes.slice().reverse().forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'entry';
+    div.innerHTML = `<div class="edate">${e.date}</div><div class="etxt">${escapeHtml(e.text)}</div><div class="edel">remover</div>`;
+    div.querySelector('.edel').addEventListener('click', ()=>{
+      reflexoes = reflexoes.filter(x=>x.id!==e.id);
+      renderReflexao();
+      setData('vida:reflexao', reflexoes);
+    });
+    el.appendChild(div);
+  });
+}
+function addReflexao(){
+  const ta = document.getElementById('reflexao-text');
+  const text = ta.value.trim();
+  if(!text) return;
+  reflexoes.push({id:uid(), date:new Date().toLocaleDateString('pt-BR',{month:'long', year:'numeric'}), text});
+  ta.value='';
+  renderReflexao();
+  setData('vida:reflexao', reflexoes);
+}
+loadReflexao();
+
+/* ---------------- exam date / countdown ---------------- */
+async function loadExamDate(){
+  const d = await getData('mext:examdate', null);
+  if(d){ document.getElementById('mext-date').value = d; }
+  updateCountdown(d);
+}
+function saveExamDate(){
+  const d = document.getElementById('mext-date').value;
+  setData('mext:examdate', d);
+  updateCountdown(d);
+}
+function updateCountdown(d){
+  const el = document.getElementById('cdnum');
+  if(!d){ el.textContent = '—'; return; }
+  const target = new Date(d+'T00:00:00');
+  const now = new Date();
+  const diff = Math.ceil((target - now) / 86400000);
+  el.textContent = diff >= 0 ? diff : '0';
+}
+loadExamDate();
+
+/* ---------------- hobbies ---------------- */
+const HOBBIES = [
+  {key:'leitura', icon:'📖', name:'Leitura'},
+  {key:'jogos', icon:'🎮', name:'Jogos'},
+  {key:'gastronomia', icon:'🍳', name:'Gastronomia'},
+  {key:'idiomas', icon:'💬', name:'Idiomas'},
+  {key:'desenho', icon:'✏️', name:'Desenho'},
+  {key:'karate', icon:'🥋', name:'Karatê Shotokan'},
+  {key:'violao', icon:'🎸', name:'Violão'}
+];
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function addDays(dateStr, n){ const d = new Date(dateStr+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+
+function sparkline(history){
+  let pts = history.slice(-14).map(p=>p.v);
+  if(pts.length<2) pts = [50,...pts];
+  const w=110,h=32,n=pts.length;
+  const stepX = n>1 ? w/(n-1) : w;
+  const coords = pts.map((v,i)=>`${(i*stepX).toFixed(1)},${(h - Math.max(0,Math.min(100,v))/100*h).toFixed(1)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}"><polyline points="${coords}" fill="none" stroke="#d1543d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+async function initHobbies(){
+  const grid = document.getElementById('hobby-grid');
+  for(const h of HOBBIES){
+    const data = await getData('hobby:'+h.key, {note:'', items:[], momentum:50, history:[{d:todayStr(), v:50}]});
+    if(!data.history) data.history = [{d:todayStr(), v:data.momentum||50}];
+    if(typeof data.momentum !== 'number') data.momentum = 50;
+
+    /* decay for missed days since last recorded entry */
+    let lastDate = data.history[data.history.length-1].d;
+    let guard = 0;
+    while(lastDate < todayStr() && guard < 6){
+      lastDate = addDays(lastDate, 1);
+      if(lastDate < todayStr()){
+        data.momentum = Math.max(0, data.momentum - 8);
+        data.history.push({d:lastDate, v:data.momentum});
+      }
+      guard++;
+    }
+    if(data.checkedToday && data.history[data.history.length-1].d !== todayStr()){
+      data.checkedToday = false;
+    }
+    await setData('hobby:'+h.key, data);
+
+    const card = document.createElement('div');
+    card.className = 'hobby-card';
+    const checkedToday = data.history[data.history.length-1].d === todayStr() && data.history.length && data.checkedToday;
+    card.innerHTML = `
+      <div class="hobby-top">
+        <div class="hobby-icon">${h.icon}</div>
+        <div class="hobby-name">${h.name}</div>
+      </div>
+      <div class="hobby-body">
+        <div class="hobby-body-inner">
+          <div class="hobby-consist">
+            <div data-spark>${sparkline(data.history)}</div>
+            <div class="consist-num"><span class="lbl">constância</span><span data-momnum>${Math.round(data.momentum)}%</span></div>
+          </div>
+          <button class="checkin-btn" data-checkin>${data.checkedToday ? '✓ feito hoje' : 'Marcar check-in de hoje'}</button>
+          <div class="list" data-list style="margin-top:14px;"></div>
+          <div class="add-row"><input placeholder="Adicionar item…" data-input /><button data-add>Add</button></div>
+          <textarea class="hobby-note" placeholder="Notas soltas…">${escapeHtml(data.note)}</textarea>
+        </div>
+      </div>`;
+    card.querySelector('.hobby-top').addEventListener('click', ()=>card.classList.toggle('open'));
+
+    const checkinBtn = card.querySelector('[data-checkin]');
+    checkinBtn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      const already = !!data.checkedToday;
+      if(already){
+        data.checkedToday = false;
+        data.momentum = Math.max(0, data.momentum - 12);
+        if(data.history.length && data.history[data.history.length-1].d === todayStr()) data.history.pop();
+        awardXP(HOBBY_ATTR[h.key], -10);
+      }else{
+        data.checkedToday = true;
+        data.momentum = Math.min(100, data.momentum + 12);
+        data.history.push({d:todayStr(), v:data.momentum});
+        awardXP(HOBBY_ATTR[h.key], 10);
+      }
+      checkinBtn.textContent = data.checkedToday ? '✓ feito hoje' : 'Marcar check-in de hoje';
+      checkinBtn.classList.toggle('done', data.checkedToday);
+      card.querySelector('[data-momnum]').textContent = Math.round(data.momentum)+'%';
+      card.querySelector('[data-spark]').innerHTML = sparkline(data.history);
+      setData('hobby:'+h.key, data);
+    });
+    if(data.checkedToday) checkinBtn.classList.add('done');
+
+    const listEl = card.querySelector('[data-list]');
+    function renderHobbyItems(){
+      listEl.innerHTML = '';
+      data.items.forEach(item=>{
+        const row = document.createElement('div');
+        row.className = 'list-item' + (item.done?' done':'');
+        row.innerHTML = `<div class="hanko ${item.done?'checked':''}"></div><div class="txt">${escapeHtml(item.text)}</div><div class="del">✕</div>`;
+        row.querySelector('.hanko').addEventListener('click', (ev)=>{ ev.stopPropagation(); item.done=!item.done; renderHobbyItems(); setData('hobby:'+h.key, data); awardXP(HOBBY_ATTR[h.key], item.done?6:-6); });
+        row.querySelector('.del').addEventListener('click', (ev)=>{ ev.stopPropagation(); data.items = data.items.filter(x=>x.id!==item.id); renderHobbyItems(); setData('hobby:'+h.key, data); });
+        listEl.appendChild(row);
+      });
+    }
+    renderHobbyItems();
+    const inputEl = card.querySelector('[data-input]');
+    card.querySelector('[data-add]').addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      const text = inputEl.value.trim();
+      if(!text) return;
+      data.items.push({id:uid(), text, done:false});
+      inputEl.value='';
+      renderHobbyItems();
+      setData('hobby:'+h.key, data);
+    });
+    inputEl.addEventListener('click', ev=>ev.stopPropagation());
+    let noteTimer;
+    const noteEl = card.querySelector('.hobby-note');
+    noteEl.addEventListener('click', ev=>ev.stopPropagation());
+    noteEl.addEventListener('input', ()=>{
+      clearTimeout(noteTimer);
+      noteTimer = setTimeout(()=>{ data.note = noteEl.value; setData('hobby:'+h.key, data); }, 500);
+    });
+    grid.appendChild(card);
+  }
+}
+initHobbies();
+
+/* ---------------- telegram integration ---------------- */
+async function loadTelegramFields(){
+  const cfg = await getData('telegram:config', {token:'', chatid:''});
+  document.getElementById('tg-token').value = cfg.token || '';
+  document.getElementById('tg-chatid').value = cfg.chatid || '';
+}
+function saveTelegram(){
+  const token = document.getElementById('tg-token').value.trim();
+  const chatid = document.getElementById('tg-chatid').value.trim();
+  setData('telegram:config', {token, chatid});
+  document.getElementById('tg-status').textContent = 'Salvo.';
+}
+async function sendTelegramMessage(text){
+  const cfg = await getData('telegram:config', {token:'', chatid:''});
+  const statusEl = document.getElementById('tg-status');
+  if(!cfg.token || !cfg.chatid){ statusEl.textContent = 'Preencha e salve o token e o chat id primeiro.'; return; }
+  statusEl.textContent = 'Enviando…';
+  try{
+    const res = await fetch(`https://api.telegram.org/bot${cfg.token}/sendMessage`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: cfg.chatid, text})
+    });
+    const j = await res.json();
+    statusEl.textContent = j.ok ? 'Mensagem enviada ✓' : ('Erro: ' + (j.description || 'falha desconhecida'));
+  }catch(e){
+    statusEl.textContent = 'Não consegui enviar (verifique a conexão ou o token).';
+  }
+}
+function testTelegram(){ sendTelegramMessage('渡 — teste da central pessoal. Se você recebeu isso, está tudo conectado.'); }
+async function sendPendencias(){
+  const pendentes = (state.inicio || []).filter(i=>!i.done).map(i=>'• '+i.text);
+  const msg = pendentes.length ? ('Pendências de hoje:\n' + pendentes.join('\n')) : 'Nenhuma pendência no foco de hoje. 🎌';
+  sendTelegramMessage(msg);
+}
+loadTelegramFields();
+
+/* ---------------- service worker (only works when hosted, not on file://) ---------------- */
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+/* enter-to-add on all add-row inputs */
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter' && e.target.tagName==='INPUT'){
+    const btn = e.target.parentElement.querySelector('button');
+    if(btn) btn.click();
+  }
+});
+</script>
+</body>
+</html>
